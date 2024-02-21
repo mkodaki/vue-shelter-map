@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, onUpdated,  } from 'vue';
+import { ref, onMounted, watch, onUpdated, } from 'vue';
 import { GoogleMap, Marker, InfoWindow } from 'vue3-google-map';
 import { supabase } from './lib/supabaseClient';
 import M from "materialize-css";
@@ -22,7 +22,7 @@ let checkFire = ref(false);
 let checkInlandWaters = ref(false);
 let checkVolcano = ref(false);
 
-const debounce = (func: any, wait = 1000) => {
+const debounce = (func: any, wait: number = 1000) => {
   console.log(wait);
   let timer: any;
   return () => {
@@ -35,7 +35,7 @@ const debounce = (func: any, wait = 1000) => {
   }
 };
 
-const getPrefectureList = async function () {
+const getPrefectureList = async () => {
   const { data } = await supabase
     .from('prefecture_master')
     .select()
@@ -47,7 +47,7 @@ const getPrefectureList = async function () {
   }
 }
 
-const getShelters = async function () {
+const getShelters = async (pan: boolean = false) => {
   const { data } = await supabase
     .from('evacuation_shelter')
     .select(`
@@ -73,14 +73,25 @@ const getShelters = async function () {
 
   console.log(data);
   if (data && data.length > 0) {
-    const lat = data[0].prefecture_master !== null ? data[0].prefecture_master.latitude : null;
-    const lng = data[0].prefecture_master !== null ? data[0].prefecture_master.longitude : null;
-    mapRef.value.map.panTo({ lat: lat, lng: lng });
+    if (pan) {
+      const lat = data[0].prefecture_master !== null ? data[0].prefecture_master.latitude : null;
+      const lng = data[0].prefecture_master !== null ? data[0].prefecture_master.longitude : null;
+      mapRef.value.map.panTo({ lat: lat, lng: lng });
+    }
     shelters.value = data;
   } else {
     M.Toast.dismissAll();
     M.toast({ html: '条件に該当する避難所はありません' });
   }
+}
+
+const checkPrefecture = (): boolean => {
+  if (selected_pref.value.length < 1) {
+    M.Toast.dismissAll();
+    M.toast({ html: '都道府県を選択してください' });
+    return false;
+  }
+  return true;
 }
 
 onMounted(() => {
@@ -95,7 +106,6 @@ onUpdated(() => {
 });
 
 watch([
-  selected_pref,
   checkFlood,
   checkLandslide,
   checkStormSurge,
@@ -104,22 +114,22 @@ watch([
   checkFire,
   checkInlandWaters,
   checkVolcano], () => {
-    if (selected_pref.value.length < 1) {
-      M.Toast.dismissAll();
-      M.toast({ html: '都道府県を選択してください' });
-      return false;
+    if (checkPrefecture()) {
+      getShelters();
     }
-    getShelters();
   }
 );
 
-watch(location, () => {
-  if (selected_pref.value.length < 1) {
-    M.Toast.dismissAll();
-    M.toast({ html: '都道府県を選択してください' });
-    return false;
+watch(selected_pref, () => {
+  if (checkPrefecture()) {
+    getShelters(true);
   }
-  debounce(getShelters, 1000)();
+});
+
+watch(location, () => {
+  if (checkPrefecture()) {
+    debounce(getShelters, 1000)();
+  }
 });
 </script>
 
