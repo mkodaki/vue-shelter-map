@@ -1,0 +1,27 @@
+{
+  "name": "vue-shelter-map",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@googlemaps/js-api-loader": "^1.16.2",
+    "@supabase/supabase-js": "^2.39.3",
+    "materialize-css": "^1.0.0",
+    "vue": "^3.4.15",
+    "vue-router": "^4.2.5",
+    "vue3-google-map": "^0.19.0"
+  },
+  "devDependencies": {
+    "@types/materialize-css": "^1.0.14",
+    "@vitejs/plugin-vue": "^5.0.3",
+    "supabase": "^1.145.2",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.0",
+    "vue-tsc": "^1.8.27"
+  }
+}
